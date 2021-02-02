@@ -1,10 +1,10 @@
 export interface MessageConfig {
   channel: string;
   message: string;
+
   // map of <emoji id, role id>
-  
   // can be Record<string, string[] | string> in the config, but changed in the code below
-  reactMap: Record<string, string[]>; 
+  reactMap: Record<string, string[]>;
 }
 
 const config = require('../config.json') as MessageConfig[];
