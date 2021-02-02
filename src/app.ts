@@ -100,6 +100,8 @@ client.on('ready', async () => {
                   `Couldn't find reaction for emoji ${react} on message ${msg.id} in channel ${channel.name}`,
                 );
               }
+
+              // Grab roles from the react-role map
               const roles = await Promise.all(
                 message.reactMap[react].map(async id => {
                   const role = await channel.guild.roles.fetch(id);
@@ -109,6 +111,7 @@ client.on('ready', async () => {
                   return role;
                 }),
               );
+
               return {
                 roles,
                 react: msgReact,
