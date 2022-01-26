@@ -8,7 +8,9 @@ COPY Cargo.lock Cargo.toml ./
 RUN cargo build --release
 RUN rm src/*.rs
 
-COPY . .
+COPY . ./
+RUN cd src && ls
+
 
 RUN cargo build --release
 
