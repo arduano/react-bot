@@ -1,13 +1,13 @@
-use std::{collections::HashMap, path::PathBuf, str::FromStr};
+use std::{path::PathBuf, str::FromStr};
 
 use indexmap::IndexMap;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use serde_json::Map;
+use serde::{Deserialize, Serialize};
+
 use twilight_model::{
     channel::ReactionType,
     id::{
         marker::{ChannelMarker, MessageMarker, RoleMarker},
-        ChannelId, Id, MessageId,
+        Id,
     },
 };
 

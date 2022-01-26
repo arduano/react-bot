@@ -1,16 +1,10 @@
-use std::{collections::HashMap, rc::Rc, sync::Arc};
+use std::rc::Rc;
 
-use config::{get_react_roles, Config, VecOrSingle};
+use config::get_react_roles;
 use futures::{Future, StreamExt};
 use twilight_gateway::{cluster::ShardScheme, Cluster, Event, EventType, Intents};
 use twilight_http::request::channel::reaction::RequestReactionType;
-use twilight_model::{
-    channel::{Channel, Message, ReactionType},
-    id::{
-        marker::{ChannelMarker, EmojiMarker, MessageMarker},
-        ChannelId, Id,
-    },
-};
+use twilight_model::channel::{Channel, ReactionType};
 
 mod config;
 mod http;
@@ -20,7 +14,7 @@ pub async fn run_socket_event_cluster<
     F: 'static + Future<Output = ()>,
 >(
     token: String,
-    mut handler: H,
+    handler: H,
 ) {
     let intents = Intents::GUILDS | Intents::GUILD_MESSAGE_REACTIONS;
 
