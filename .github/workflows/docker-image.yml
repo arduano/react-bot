@@ -12,14 +12,32 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Test
+        run: ls
+
       - name: docker login
         env:
           DOCKER_USER: ${{secrets.DOCKER_USER}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
         run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-single-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-single-buildx
+
       - name: Build the Docker image
-        run: docker build . --file Dockerfile -t arduano/react-bot:$(date +%s) -t arduano/react-bot:latest
+        run: docker build . -t arduano/react-bot:$(date +%s) -t arduano/react-bot:latest
 
       - name: Docker Push
         run: docker push arduano/react-bot
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
