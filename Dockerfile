@@ -1,10 +1,23 @@
-FROM node:14
+FROM rust as build
 
-COPY package.json yarn.lock ./
-RUN yarn --pure-lockfile
+RUN USER=root cargo new --bin app
+WORKDIR /app
+
+COPY Cargo.lock Cargo.toml ./
+
+RUN cargo build --release
+RUN rm src/*.rs
 
 COPY . .
 
-RUN yarn
+RUN cargo build --release
 
-CMD yarn start
+FROM ubuntu
+
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+WORKDIR /app
+
+COPY --from=build /app/target/release/react-bot .
+RUN chmod +x ./react-bot
+
+CMD ./react-bot
