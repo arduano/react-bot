@@ -5,13 +5,13 @@ WORKDIR /app
 
 COPY Cargo.lock Cargo.toml ./
 
-RUN rm ./target/release/deps/react_bot*
 RUN cargo build --release
 RUN rm src/*.rs
 
 COPY . .
 
 
+RUN rm ./target/release/deps/react_bot*
 RUN cargo build --release
 
 FROM ubuntu
