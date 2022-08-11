@@ -2,9 +2,9 @@ use std::rc::Rc;
 
 use config::get_react_roles;
 use futures::{Future, StreamExt};
-use twilight_gateway::{cluster::ShardScheme, Cluster, Event, EventType, Intents};
+use twilight_gateway::{Cluster, Event, EventType, Intents};
 use twilight_http::request::channel::reaction::RequestReactionType;
-use twilight_model::channel::{Channel, ReactionType};
+use twilight_model::channel::ReactionType;
 
 mod config;
 mod http;
@@ -18,10 +18,7 @@ pub async fn run_socket_event_cluster<
 ) {
     let intents = Intents::GUILDS | Intents::GUILD_MESSAGE_REACTIONS;
 
-    let scheme = ShardScheme::Auto;
-
     let (cluster, mut events) = Cluster::builder(token, intents)
-        .shard_scheme(scheme)
         .build()
         .await
         .expect("Failed to create cluster");
@@ -31,7 +28,7 @@ pub async fn run_socket_event_cluster<
     });
 
     while let Some((id, event)) = events.next().await {
-        let epic = match event.kind() {
+        let print = match event.kind() {
             EventType::ShardConnected
             | EventType::ShardConnecting
             | EventType::ShardDisconnected
@@ -41,7 +38,7 @@ pub async fn run_socket_event_cluster<
             _ => false,
         };
 
-        if epic {
+        if print {
             println!("Shard: {}, Event: {:?}", id, event.kind());
         }
 
@@ -74,12 +71,9 @@ async fn main() {
         let message = http.get_message(config.channel, config.message).await;
 
         let channel = http.get_channel(config.channel).await;
-        let channel = match channel {
-            Channel::Guild(guild) => guild,
-            _ => panic!("Channel is not a guild"),
-        };
+        let guild_id = channel.guild_id.expect("Channel is not a guild");
 
-        let guild = http.get_guild(channel.guild_id().unwrap()).await;
+        let guild = http.get_guild(guild_id).await;
 
         // Add missing reactions
         for (emoji_name, _) in config.react_map.iter() {
