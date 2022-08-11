@@ -1,0 +1,12 @@
+version: '3'
+services:
+  messages:
+    image: arduano/react-bot
+    container_name: bots_aniuts_reacts
+    restart: unless-stopped
+    volumes:
+      - ./config.json:/app/config.json
+    environment:
+      - TOKEN=${TOKEN}
+      - RUST_BACKTRACE=1
+      - LOG_LEVEL=debug

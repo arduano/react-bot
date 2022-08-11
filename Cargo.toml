@@ -7,11 +7,11 @@ edition = "2021"
 
 [dependencies]
 dotenv = "0.15.0"
-futures = "0.3.19"
-indexmap = { version = "1.8.0", features = ["serde"] }
-serde = "1.0.136"
-serde_json = { version = "1.0.72", features = ["preserve_order"] }
-tokio = { version = "1.15.0", features = ["macros"] }
+futures = "0.3.21"
+indexmap = { version = "1.9.1", features = ["serde"] }
+serde = "1.0.143"
+serde_json = { version = "1.0.83", features = ["preserve_order"] }
+tokio = { version = "1.20.1", features = ["macros"] }
 twilight-gateway = "0.12.1"
 twilight-http = "0.12.1"
 twilight-model = "0.12.2"
