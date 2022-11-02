@@ -14,7 +14,7 @@ COPY . .
 RUN rm ./target/release/deps/react_bot*
 RUN cargo build --release
 
-FROM ubuntu
+FROM ubuntu:kinetic-20220830
 
 RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 WORKDIR /app
