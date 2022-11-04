@@ -1,6 +1,8 @@
 FROM rust as build
 
 RUN rustup target add x86_64-unknown-linux-musl
+RUN apt update
+RUN apt install musl-tools -y
 
 RUN USER=root cargo new --bin app
 WORKDIR /app
@@ -13,15 +15,15 @@ RUN rm src/*.rs
 COPY . .
 
 
-RUN rm ./target/release/deps/react_bot*
+RUN rm ./target/x86_64-unknown-linux-musl/release/deps/react_bot*
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
 FROM alpine
 
-RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+# RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 WORKDIR /app
 
-COPY --from=build /app/target/release/react-bot .
+COPY --from=build /app/target/x86_64-unknown-linux-musl/release/react-bot .
 RUN chmod +x ./react-bot
 
 CMD ./react-bot
