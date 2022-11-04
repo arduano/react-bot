@@ -1,5 +1,7 @@
 FROM rust as build
 
+RUN rustup target add x86_64-unknown-linux-musl
+
 RUN USER=root cargo new --bin app
 WORKDIR /app
 
