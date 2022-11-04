@@ -28,7 +28,7 @@ impl HttpApi {
             .message(channel_id, message_id)
             .exec()
             .await
-            .unwrap()
+            .expect("Failed to get message")
             .model()
             .await
             .unwrap()
@@ -39,7 +39,7 @@ impl HttpApi {
             .guild(guild_id)
             .exec()
             .await
-            .unwrap()
+            .expect("Failed to get guild")
             .model()
             .await
             .unwrap()
@@ -50,7 +50,7 @@ impl HttpApi {
             .channel(channel_id)
             .exec()
             .await
-            .unwrap()
+            .expect("Failed to get chanel")
             .model()
             .await
             .unwrap()
@@ -66,7 +66,7 @@ impl HttpApi {
             .create_reaction(channel_id, message_id, &reaction)
             .exec()
             .await
-            .unwrap();
+            .expect("Failed to add reaction");
     }
 
     pub async fn add_role<'a>(
@@ -79,7 +79,7 @@ impl HttpApi {
             .add_guild_member_role(guild_id, user_id, role_id)
             .exec()
             .await
-            .unwrap();
+            .expect("Failed to add role");
     }
 
     pub async fn remove_role<'a>(
@@ -92,7 +92,7 @@ impl HttpApi {
             .remove_guild_member_role(guild_id, user_id, role_id)
             .exec()
             .await
-            .unwrap();
+            .expect("Failed to remove role");
     }
 
     pub async fn get_emoji(&self, guild: &Guild, emoji_name_or_id: &str) -> ReactionType {
