@@ -1,6 +1,6 @@
 version: '3'
 services:
-  messages:
+  reacts:
     build: .
     container_name: bots_aniuts_reacts
     restart: unless-stopped
