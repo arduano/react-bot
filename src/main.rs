@@ -40,6 +40,8 @@ async fn run() {
 
     let http = DiscordClient::new(token.clone());
 
+    println!("Initializing reactions...");
+
     // Initialize the reactions
     for config in configs.iter() {
         let message = http.message(config.channel, config.message).await.unwrap();
@@ -67,6 +69,8 @@ async fn run() {
 
     let http = Rc::new(http);
     let configs = Rc::new(configs);
+
+    println!("Initialized, starting the gateway cluster...");
 
     let intents = Intents::GUILDS | Intents::GUILD_MESSAGE_REACTIONS;
     midnight::run_discord_event_loop_or_panic(token, intents, move |e| {
