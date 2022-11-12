@@ -14,13 +14,11 @@ RUN rm src/*.rs
 
 COPY . .
 
-
 RUN rm ./target/x86_64-unknown-linux-musl/release/deps/react_bot*
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
 FROM alpine
 
-# RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
 WORKDIR /app
 
 COPY --from=build /app/target/x86_64-unknown-linux-musl/release/react-bot .
