@@ -1,7 +1,13 @@
 use std::{path::PathBuf, str::FromStr};
 
 use indexmap::IndexMap;
-use midnight::twilight::model::{id::{Id, marker::{RoleMarker, ChannelMarker, MessageMarker}}, channel::ReactionType};
+use midnight::twilight::model::{
+    channel::ReactionType,
+    id::{
+        marker::{ChannelMarker, MessageMarker, RoleMarker},
+        Id,
+    },
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
