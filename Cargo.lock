@@ -478,6 +478,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
+name = "midnight"
+version = "0.1.0"
+source = "git+https://github.com/arduano/midnight.git?rev=8a73d9c#8a73d9c913f8fc4d94878912341254b21c97afd5"
+dependencies = [
+ "futures",
+ "thiserror",
+ "tokio",
+ "twilight-gateway",
+ "twilight-http",
+ "twilight-model",
+ "twilight-util",
+ "twilight-validate",
+]
+
+[[package]]
 name = "miniz_oxide"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -622,12 +637,10 @@ dependencies = [
  "dotenv",
  "futures",
  "indexmap",
+ "midnight",
  "serde",
  "serde_json",
  "tokio",
- "twilight-gateway",
- "twilight-http",
- "twilight-model",
 ]
 
 [[package]]
@@ -1102,6 +1115,15 @@ dependencies = [
  "serde_repr",
  "time",
  "tracing",
+]
+
+[[package]]
+name = "twilight-util"
+version = "0.13.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15c8282a2806ead7baed20dcb3f12dc89b2fc83da29cbc2c8e73cc27f849218d"
+dependencies = [
+ "twilight-model",
 ]
 
 [[package]]

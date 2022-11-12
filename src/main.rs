@@ -1,50 +1,17 @@
 use std::rc::Rc;
 
 use config::get_react_roles;
-use futures::{Future, StreamExt};
-use twilight_gateway::{Cluster, Event, EventType, Intents};
-use twilight_http::request::channel::reaction::RequestReactionType;
-use twilight_model::channel::ReactionType;
+use midnight::twilight::{
+    gateway::{Event, Intents},
+    http::request::channel::reaction::RequestReactionType,
+    model::{
+        channel::ReactionType,
+        guild::Guild,
+        id::{marker::EmojiMarker, Id},
+    },
+};
 
 mod config;
-mod http;
-
-pub async fn run_socket_event_cluster<
-    H: 'static + Fn(Event) -> F,
-    F: 'static + Future<Output = ()>,
->(
-    token: String,
-    handler: H,
-) {
-    let intents = Intents::GUILDS | Intents::GUILD_MESSAGE_REACTIONS;
-
-    let (cluster, mut events) = Cluster::builder(token, intents)
-        .build()
-        .await
-        .expect("Failed to create cluster");
-
-    tokio::spawn(async move {
-        cluster.up().await;
-    });
-
-    while let Some((id, event)) = events.next().await {
-        let print = match event.kind() {
-            EventType::ShardConnected
-            | EventType::ShardConnecting
-            | EventType::ShardDisconnected
-            | EventType::ShardIdentifying
-            | EventType::ShardReconnecting
-            | EventType::ShardResuming => true,
-            _ => false,
-        };
-
-        if print {
-            println!("Shard: {}, Event: {:?}", id, event.kind());
-        }
-
-        handler(event).await;
-    }
-}
 
 fn as_request_reaction_type<'a>(react: &'a ReactionType) -> RequestReactionType<'a> {
     match react {
@@ -58,34 +25,39 @@ fn as_request_reaction_type<'a>(react: &'a ReactionType) -> RequestReactionType<
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
+    run().await
+}
+
+async fn run() {
     dotenv::dotenv().ok();
 
     let configs = config::read_config();
 
     let token = std::env::var("TOKEN").expect("TOKEN not set");
 
-    let http = http::HttpApi::new(token.clone());
+    let http = midnight::client::DiscordClient::new(token.clone());
 
     // Initialize the reactions
     for config in configs.iter() {
-        let message = http.get_message(config.channel, config.message).await;
+        let message = http.message(config.channel, config.message).await.unwrap();
 
-        let channel = http.get_channel(config.channel).await;
+        let channel = http.channel(config.channel).await.unwrap();
         let guild_id = channel.guild_id.expect("Channel is not a guild");
 
-        let guild = http.get_guild(guild_id).await;
+        let guild = http.guild(guild_id).await.unwrap();
 
         // Add missing reactions
         for (emoji_name, _) in config.react_map.iter() {
-            let emoji = http.get_emoji(&guild, emoji_name).await;
+            let emoji = get_emoji(&guild, emoji_name);
             let my_react = message.reactions.iter().find(|e| e.emoji == emoji && e.me);
             if my_react.is_none() {
                 http.add_reaction(
                     config.channel,
                     config.message,
-                    as_request_reaction_type(&emoji),
+                    &as_request_reaction_type(&emoji),
                 )
-                .await;
+                .await
+                .unwrap();
             }
         }
     }
@@ -93,9 +65,20 @@ async fn main() {
     let http = Rc::new(http);
     let configs = Rc::new(configs);
 
-    run_socket_event_cluster(token, move |e| {
+    let intents = Intents::GUILDS | Intents::GUILD_MESSAGE_REACTIONS;
+    midnight::run_discord_event_loop_or_panic(token, intents, move |e| {
         let configs = configs.clone();
         let http = http.clone();
+
+        match e {
+            Event::ShardConnected(_)
+            | Event::ShardConnecting(_)
+            | Event::ShardDisconnected(_)
+            | Event::ShardIdentifying(_)
+            | Event::ShardReconnecting(_)
+            | Event::ShardResuming(_) => println!("Event: {:?}", e.kind()),
+            _ => {}
+        }
 
         async move {
             match e {
@@ -110,7 +93,11 @@ async fn main() {
 
                     for role in roles.iter() {
                         http.add_role(react.guild_id.unwrap(), react.user_id, role)
-                            .await;
+                            .await
+                            .map_err(|err| {
+                                println!("Error adding role: {:?}", err);
+                            })
+                            .ok();
                     }
                 }
                 Event::ReactionRemove(react) => {
@@ -124,7 +111,11 @@ async fn main() {
 
                     for role in roles.iter() {
                         http.remove_role(react.guild_id.unwrap(), react.user_id, role)
-                            .await;
+                            .await
+                            .map_err(|err| {
+                                println!("Error removing role: {:?}", err);
+                            })
+                            .ok();
                     }
                 }
 
@@ -133,4 +124,28 @@ async fn main() {
         }
     })
     .await;
+}
+
+pub fn get_emoji(guild: &Guild, emoji_name_or_id: &str) -> ReactionType {
+    match emoji_name_or_id.parse::<Id<EmojiMarker>>() {
+        Ok(id) => {
+            // Custom emoji
+            let guild_emoji = guild.emojis.iter().find(|emoji| emoji.id == id);
+            let emoji = match guild_emoji {
+                Some(emoji) => emoji,
+                None => panic!("Emoji {id} not found"),
+            };
+            ReactionType::Custom {
+                animated: emoji.animated,
+                id,
+                name: Some(emoji.name.clone()),
+            }
+        }
+        Err(_) => {
+            // Unicode emoji
+            ReactionType::Unicode {
+                name: emoji_name_or_id.to_string(),
+            }
+        }
+    }
 }
