@@ -1,13 +1,16 @@
 use std::rc::Rc;
 
 use config::get_react_roles;
-use midnight::twilight::{
-    gateway::{Event, Intents},
-    http::request::channel::reaction::RequestReactionType,
-    model::{
-        channel::ReactionType,
-        guild::Guild,
-        id::{marker::EmojiMarker, Id},
+use midnight::{
+    client::DiscordClient,
+    twilight::{
+        gateway::{Event, Intents},
+        http::request::channel::reaction::RequestReactionType,
+        model::{
+            channel::ReactionType,
+            guild::Guild,
+            id::{marker::EmojiMarker, Id},
+        },
     },
 };
 
@@ -35,7 +38,7 @@ async fn run() {
 
     let token = std::env::var("TOKEN").expect("TOKEN not set");
 
-    let http = midnight::client::DiscordClient::new(token.clone());
+    let http = DiscordClient::new(token.clone());
 
     // Initialize the reactions
     for config in configs.iter() {

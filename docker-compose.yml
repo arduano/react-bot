@@ -2,7 +2,6 @@ version: '3'
 services:
   reacts:
     build: .
-    container_name: bots_aniuts_reacts
     restart: unless-stopped
     volumes:
       - ./config.json:/app/config.json
