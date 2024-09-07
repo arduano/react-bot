@@ -17,7 +17,7 @@ COPY . .
 RUN rm ./target/x86_64-unknown-linux-musl/release/deps/react_bot*
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
-FROM alpine
+FROM alpine:3.20.3
 
 WORKDIR /app
 
